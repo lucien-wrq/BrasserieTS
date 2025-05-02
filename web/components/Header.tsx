@@ -7,14 +7,22 @@ export default function Header() {
   const router = useRouter();
 
   useEffect(() => {
-    // Récupérer le rôle depuis le localStorage
-    const userRole = localStorage.getItem("role");
-    setRole(userRole);
+    // Fonction pour synchroniser le rôle avec le localStorage
+    const syncRole = () => {
+      const userRole = localStorage.getItem("role");
+      setRole(userRole);
+    };
 
-    // Rediriger si l'utilisateur n'est pas admin et essaie d'accéder à une page admin
-    if (userRole !== "Administrateur" && router.pathname.includes("/admin")) {
-      router.push("/"); // Redirige vers la page d'accueil si l'utilisateur n'est pas admin
-    }
+    // Récupérer le rôle initial
+    syncRole();
+
+    // Écouter les changements dans le localStorage
+    window.addEventListener("storage", syncRole);
+
+    // Nettoyer l'écouteur lors du démontage du composant
+    return () => {
+      window.removeEventListener("storage", syncRole);
+    };
   }, [router]);
 
   const handleLogout = () => {
