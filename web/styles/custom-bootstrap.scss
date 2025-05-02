@@ -1,0 +1,14 @@
+// filepath: c:\Users\lucie\Desktop\projet_bts\web\styles\custom-bootstrap.scss
+
+// Redéfinir les variables Bootstrap avec la nouvelle palette
+$primary: #70798c; // slate-gray
+$secondary: #dad2bc; // bone
+$success: #f5f1ed; // isabelline
+$danger: #252323; // raisin-black
+$warning: #a99985; // khaki
+$info: #f5f1ed; // isabelline
+$light: #ffffff; // white
+$dark: #252323; // raisin-black
+
+// Importer Bootstrap après avoir redéfini les variables
+@import "bootstrap/scss/bootstrap";
