@@ -38,7 +38,7 @@ export default function Header() {
             height={100}
             className="me-3"
           />
-          <h1 className="h4 mb-0 text-decoration-none">Brasserie BTS</h1>
+          <h1 className="h4 mb-0 text-decoration-none">Brasserie TS</h1>
         </div>
 
         {/* Navigation */}
