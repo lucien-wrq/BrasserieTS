@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
+import { apiClient } from "../../utils/apiClient"; // Import de la fonction utilitaire
 
 export default function ReservationsClient() {
   const [reservations, setReservations] = useState([]);
@@ -9,25 +10,8 @@ export default function ReservationsClient() {
 
   useEffect(() => {
     const fetchReservations = async () => {
-      const token = localStorage.getItem("jwtToken"); // Récupérer le token JWT
-
-      if (!token) {
-        console.error("Token JWT manquant.");
-        return;
-      }
-
       try {
-        const response = await fetch("/api/reservations", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Ajouter le token JWT dans l'en-tête
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement des réservations.");
-        }
-
-        const data = await response.json();
+        const data = await apiClient("/api/reservations");
         setReservations(data); // Charger les réservations
       } catch (error) {
         console.error("Erreur lors du chargement des réservations :", error);
@@ -39,25 +23,8 @@ export default function ReservationsClient() {
 
   useEffect(() => {
     const fetchDetailsReservations = async () => {
-      const token = localStorage.getItem("jwtToken");
-
-      if (!token) {
-        console.error("Token JWT manquant.");
-        return;
-      }
-
       try {
-        const response = await fetch("/api/details-reservations", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Erreur lors du chargement des détails des réservations.");
-        }
-
-        const data = await response.json();
+        const data = await apiClient("/api/details-reservations");
         setDetailsReservations(data);
       } catch (error) {
         console.error("Erreur lors du chargement des détails des réservations :", error);
@@ -68,7 +35,6 @@ export default function ReservationsClient() {
   }, []);
 
   useEffect(() => {
-    // Charger les produits
     const fetchProduits = async () => {
       const produitsMap: any = {};
       const uniqueProduitIds = new Set(
@@ -76,12 +42,14 @@ export default function ReservationsClient() {
       );
 
       for (const produitId of uniqueProduitIds) {
-        const response = await fetch(`/api/produits/${produitId}`);
-        const produit = await response.json();
-        produitsMap[produitId] = produit;
+        try {
+          const produit = await apiClient(`/api/produits/${produitId}`);
+          produitsMap[produitId] = produit;
+        } catch (error) {
+          console.error(`Erreur lors de la récupération du produit ${produitId} :`, error);
+        }
       }
 
-      console.log("Données des produits :", produitsMap);
       setProduits(produitsMap);
     };
 
@@ -91,7 +59,6 @@ export default function ReservationsClient() {
   }, [detailsReservations]);
 
   useEffect(() => {
-    // Charger les utilisateurs
     const fetchUtilisateurs = async () => {
       const utilisateursMap: any = {};
       const uniqueUtilisateurIds = new Set(
@@ -99,12 +66,14 @@ export default function ReservationsClient() {
       );
 
       for (const utilisateurId of uniqueUtilisateurIds) {
-        const response = await fetch(`/api/utilisateurs/${utilisateurId}`);
-        const utilisateur = await response.json();
-        utilisateursMap[utilisateurId] = utilisateur;
+        try {
+          const utilisateur = await apiClient(`/api/utilisateurs/${utilisateurId}`);
+          utilisateursMap[utilisateurId] = utilisateur;
+        } catch (error) {
+          console.error(`Erreur lors de la récupération de l'utilisateur ${utilisateurId} :`, error);
+        }
       }
 
-      console.log("Données des utilisateurs :", utilisateursMap);
       setUtilisateurs(utilisateursMap);
     };
 
@@ -115,27 +84,14 @@ export default function ReservationsClient() {
 
   const handleMettreEnAttente = async (id: number) => {
     try {
-      const response = await fetch(`/api/reservations/${id}`, {
+      await apiClient(`/api/reservations/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ etat: "En attente" }), // Envoi de l'état "En attente"
+        body: JSON.stringify({ etat: "En attente" }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(`Erreur : ${errorData.error || "Impossible de mettre à jour la réservation."}`);
-        return;
-      }
-
       alert(`La réservation avec l'ID ${id} a été mise en attente avec succès.`);
-      // Recharger les réservations pour refléter les modifications
-      fetch("/api/reservations")
-        .then((res) => res.json())
-        .then((data) => {
-          setReservations(data);
-        });
+      const data = await apiClient("/api/reservations");
+      setReservations(data);
     } catch (error) {
       console.error("Erreur lors de la mise en attente de la réservation :", error);
       alert("Une erreur est survenue. Veuillez réessayer.");
@@ -144,27 +100,17 @@ export default function ReservationsClient() {
 
   const handleCancel = async (id: number) => {
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer cette réservation ?`)) {
-      return; // Annule l'action si l'utilisateur clique sur "Annuler"
+      return;
     }
 
     try {
-      const response = await fetch(`/api/reservations/${id}`, {
+      await apiClient(`/api/reservations/${id}`, {
         method: "DELETE",
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(`Erreur : ${errorData.error || "Impossible de supprimer la réservation."}`);
-        return;
-      }
-
       alert(`La réservation avec l'ID ${id} a été supprimée avec succès.`);
-      // Recharger les réservations pour refléter les modifications
-      fetch("/api/reservations")
-        .then((res) => res.json())
-        .then((data) => {
-          setReservations(data);
-        });
+      const data = await apiClient("/api/reservations");
+      setReservations(data);
     } catch (error) {
       console.error("Erreur lors de la suppression de la réservation :", error);
       alert("Une erreur est survenue. Veuillez réessayer.");
@@ -173,58 +119,32 @@ export default function ReservationsClient() {
 
   const handleConfirmer = async (id: number) => {
     try {
-      const response = await fetch(`/api/reservations/${id}`, {
+      await apiClient(`/api/reservations/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ etat: "Confirmée" }), // Envoi de l'état "En attente"
+        body: JSON.stringify({ etat: "Confirmée" }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(`Erreur : ${errorData.error || "Impossible de mettre à jour la réservation."}`);
-        return;
-      }
-
       alert(`La réservation avec l'ID ${id} a été Confirmée avec succès.`);
-      // Recharger les réservations pour refléter les modifications
-      fetch("/api/reservations")
-        .then((res) => res.json())
-        .then((data) => {
-          setReservations(data);
-        });
+      const data = await apiClient("/api/reservations");
+      setReservations(data);
     } catch (error) {
-      console.error("Erreur lors de la mise en attente de la réservation :", error);
+      console.error("Erreur lors de la confirmation de la réservation :", error);
       alert("Une erreur est survenue. Veuillez réessayer.");
     }
   };
 
   const handleAnnuler = async (id: number) => {
     try {
-      const response = await fetch(`/api/reservations/${id}`, {
+      await apiClient(`/api/reservations/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ etat: "Annulée" }), // Envoi de l'état "En attente"
+        body: JSON.stringify({ etat: "Annulée" }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(`Erreur : ${errorData.error || "Impossible de mettre à jour la réservation."}`);
-        return;
-      }
-
       alert(`La réservation avec l'ID ${id} a été Annulée avec succès.`);
-      // Recharger les réservations pour refléter les modifications
-      fetch("/api/reservations")
-        .then((res) => res.json())
-        .then((data) => {
-          setReservations(data);
-        });
+      const data = await apiClient("/api/reservations");
+      setReservations(data);
     } catch (error) {
-      console.error("Erreur lors de la mise en attente de la réservation :", error);
+      console.error("Erreur lors de l'annulation de la réservation :", error);
       alert("Une erreur est survenue. Veuillez réessayer.");
     }
   };
@@ -247,12 +167,10 @@ export default function ReservationsClient() {
     })}`;
   };
 
-  // Filtrer les réservations confirmées
   const confirmedReservations = reservations.filter(
     (reservation: any) => reservation.status?.etat === "Confirmée"
   );
 
-  // Filtrer les autres réservations
   const otherReservations = reservations.filter(
     (reservation: any) => reservation.status?.etat !== "Confirmée"
   );

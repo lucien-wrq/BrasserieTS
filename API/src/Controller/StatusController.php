@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Attribute\Security;
 
 
 #[Route('/api/status')]
@@ -21,6 +23,8 @@ class StatusController extends AbstractController
     /**
      * Route pour récupérer tous les statuts
      */
+    #[OA\Tag(name: 'Statuts')]
+    #[Security(name: 'Bearer')]
     #[Route('', name: 'getStatus', methods: ['GET'])]
     public function getAllStatus(StatusRepository $statusRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -32,6 +36,8 @@ class StatusController extends AbstractController
     /**
      * Route pour creer un nouveau statut
      */
+    #[OA\Tag(name: 'Statuts')]
+    #[Security(name: 'Bearer')]
     #[Route('', name: 'createStatus', methods: ['POST'])]
     public function addStatus(
         Request $request,

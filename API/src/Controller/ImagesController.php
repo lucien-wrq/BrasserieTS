@@ -8,12 +8,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
+use OpenApi\Attributes as OA;
 
 class ImagesController extends AbstractController
 {
     /**
      * Route pour récupérer une image spécifique par son ID (nom de fichier)
      */
+    #[OA\Tag(name: 'Images')]
     #[Route('/api/images/{id}', name: 'get_image_by_id', methods: ['GET'])]
     public function getImageById(string $id): Response
     {
@@ -43,6 +45,7 @@ class ImagesController extends AbstractController
     /**
      * Route pour uploader une image
      */
+    #[OA\Tag(name: 'Images')]
     #[Route('/api/produits/{id}/upload-image', name: 'upload_image_for_product', methods: ['POST'])]
     public function uploadImageForProduct(int $id, Request $request): JsonResponse
     {
@@ -85,6 +88,7 @@ class ImagesController extends AbstractController
     /**
      * Route pour uploader une image
      */
+    #[OA\Tag(name: 'Images')]
     #[Route('/api/upload-image', name: 'upload_image', methods: ['POST'])]
     public function uploadImage(Request $request): JsonResponse
     {

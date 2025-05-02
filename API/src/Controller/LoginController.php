@@ -13,12 +13,14 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use OpenApi\Attributes as OA;
 
 class LoginController extends AbstractController
 {
     /**
      * Route pour vérifier l'utilisateur et générer un token JWT
      */
+    #[OA\Tag(name: 'Authentification')]
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function verifyUtilisateur(
         Request $request,
@@ -61,7 +63,6 @@ class LoginController extends AbstractController
         return new JsonResponse([
             'token' => $token,
             'utilisateur' => $utilisateurData,
-            'redirect' => '/monEspace'
         ], JsonResponse::HTTP_OK);
     }
 }

@@ -17,12 +17,17 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Attribute\Security;
+
 
 final class ReservationController extends AbstractController
 {
     /**
      * Route pour récupérer toutes les réservations
      */
+    #[OA\Tag(name: 'Réservations')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/reservations', name: 'getReservations', methods: ['GET'])]
     public function getAllReservations(ReservationRepository $reservationRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -34,6 +39,8 @@ final class ReservationController extends AbstractController
     /**
      * Route pour récupérer une réservation par son ID
      */
+    #[OA\Tag(name: 'Réservations')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/reservations/{id}', name: 'getReservation', methods: ['GET'])]
     public function getDetailReservation(Reservation $reservation, SerializerInterface $serializer): JsonResponse
     {
@@ -44,6 +51,8 @@ final class ReservationController extends AbstractController
     /**
      * Route pour supprime la réservation et les détails de réservation associés par son ID
      */
+    #[OA\Tag(name: 'Réservations')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/reservations/{id}', name: 'deleteReservation', methods: ['DELETE'])]
     public function deleteReservation(Reservation $reservation, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -55,6 +64,8 @@ final class ReservationController extends AbstractController
     /**
      * Route pour créer une nouvelle réservation
      */
+    #[OA\Tag(name: 'Réservations')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/reservations', name:"createReservations", methods: ['POST'])]
     public function createReservations(
         Request $request, 
@@ -144,6 +155,8 @@ final class ReservationController extends AbstractController
     /**
      * Route pour mettre à jour une réservation par son ID
      */
+    #[OA\Tag(name: 'Réservations')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/reservations/{id}', name: 'updateReservation', methods: ['PUT'])]
     public function updateReservation(
         Request $request,

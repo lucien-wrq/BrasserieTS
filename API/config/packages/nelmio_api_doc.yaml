@@ -1,9 +1,55 @@
+# config\packages\nelmio_api_doc.yaml
+
 nelmio_api_doc:
     documentation:
         info:
-            title: API Doc
-            description: Documentation de l'API Brasserie TS
+            title: Documentation API Brasserie TS
+            description: "Cette documentation permet de comprendre le fonctionnement de l'API REST derrière la Brasserie TS. Cette API est utilisée pour le contexte 1 (site web) et le contexte 2 (application mobile). Les méthodes existantes sont toutes documentées ici et implémenter dans les contextes des projets. \n\n Pour faire des requêtes sur l'API vous devez être logger et récupérer un Token. \n- Rubrique Token, faire une requête et récupérer le Token \n- Insérer le Token dans 'Authorize' sous la forme : Bearer {Token}" 
             version: 1.0.0
-    areas: # to filter documented areas
+        paths:
+            /api/login_check:
+                post:
+                    operationId: postCredentialsItem
+                    tags:
+                        - Token
+                    summary: Permet d'obtenir le token JWT pour se logger.
+                    requestBody:
+                        description: Crée un nouveau token JWT
+                        content:
+                            application/json:
+                                schema:
+                                    $ref: '#/components/schemas/Credentials'
+                    responses:
+                        '200':
+                            description: Récupère le token JWT
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/Token'
+        components:
+            schemas:
+                Token:
+                    type: object
+                    properties:
+                        token:
+                            type: string
+                            readOnly: true
+                Credentials:
+                    type: object
+                    properties:
+                        username:
+                            type: string
+                            default: apiDoc@exemple.com
+                        password:
+                            type: string
+                            default: apiDoc@password
+            securitySchemes:
+                bearerAuth:
+                    type: apiKey
+                    in: header
+                    name: Authorization 
+        security:
+            - bearerAuth: []
+    areas: 
         path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^/api(?!/doc$) 

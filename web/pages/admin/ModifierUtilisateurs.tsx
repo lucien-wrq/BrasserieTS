@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Header from "../../components/Header";
+import { apiClient } from "../../utils/apiClient"; // Import de la fonction utilitaire
 
 export default function ModifierUtilisateurs() {
   const [utilisateur, setUtilisateur] = useState({
     nom: "",
     prenom: "",
     email: "",
-    administrateur: false, // Par défaut, utilisateur n'est pas admin
+    role: "", // Le rôle est maintenant une chaîne unique
   });
 
   const [error, setError] = useState("");
@@ -19,16 +20,12 @@ export default function ModifierUtilisateurs() {
     const fetchUtilisateur = async () => {
       if (!id) return;
       try {
-        const response = await fetch(`/api/utilisateurs/${id}`);
-        if (!response.ok) {
-          throw new Error("Erreur lors de la récupération de l'utilisateur.");
-        }
-        const data = await response.json();
+        const data = await apiClient(`/api/utilisateurs/${id}`); // Utilisation de apiClient
         setUtilisateur({
           nom: data.nom,
           prenom: data.prenom,
           email: data.email,
-          administrateur: data.administrateur,
+          role: data.roles[0] || "ROLE_USER", // Assurez-vous de prendre le premier rôle ou un rôle par défaut
         });
       } catch (err) {
         console.error(err);
@@ -40,19 +37,10 @@ export default function ModifierUtilisateurs() {
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    const checked = (e.target as HTMLInputElement).checked;
+    const { name, value } = e.target;
     setUtilisateur((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value === "admin";
-    setUtilisateur((prev) => ({
-      ...prev,
-      administrateur: value,
+      [name]: value,
     }));
   };
 
@@ -60,21 +48,23 @@ export default function ModifierUtilisateurs() {
     e.preventDefault();
 
     // Validation des champs
-    if (!utilisateur.nom || !utilisateur.email) {
+    if (!utilisateur.nom || !utilisateur.email || !utilisateur.role) {
       setError("Tous les champs doivent être remplis.");
       return;
     }
 
-    try {
-      const response = await fetch(`/api/utilisateurs/${id}`, {
-        method: "PUT", // Utilisation de la méthode PUT pour la modification
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(utilisateur),
-      });
+    const payload = {
+      nom: utilisateur.nom,
+      prenom: utilisateur.prenom,
+      email: utilisateur.email,
+      roles: [utilisateur.role], // Envoyer le rôle sous forme de tableau
+    };
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de la modification de l'utilisateur.");
-      }
+    try {
+      await apiClient(`/api/utilisateurs/${id}`, {
+        method: "PUT", // Utilisation de la méthode PUT pour la modification
+        body: JSON.stringify(payload),
+      });
 
       alert("Utilisateur modifié avec succès !");
       router.push("/admin/clients");
@@ -149,12 +139,12 @@ export default function ModifierUtilisateurs() {
                 id="role"
                 name="role"
                 className="form-select"
-                value={utilisateur.administrateur ? "admin" : "utilisateur"}
-                onChange={handleRoleChange}
+                value={utilisateur.role}
+                onChange={handleChange}
                 required
               >
-                <option value="utilisateur">Utilisateur</option>
-                <option value="admin">Admin</option>
+                <option value="ROLE_USER">Utilisateur</option>
+                <option value="ROLE_ADMIN">Administrateur</option>
               </select>
             </div>
             <button type="submit" className="btn btn-primary mb-3">

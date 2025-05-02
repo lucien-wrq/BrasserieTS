@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import { useRouter } from "next/router";
+import { apiClient } from "../../utils/apiClient"; // Import de la fonction utilitaire
 
 export default function GestionClients() {
   const [clients, setClients] = useState([]);
@@ -8,25 +9,8 @@ export default function GestionClients() {
 
   useEffect(() => {
     const fetchUtilisateurs = async () => {
-      const token = localStorage.getItem("jwtToken"); // Récupérer le token JWT
-
-      if (!token) {
-        console.error("Token JWT manquant.");
-        return;
-      }
-
       try {
-        const response = await fetch("/api/utilisateurs", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Ajouter le token JWT dans l'en-tête
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Erreur lors de la récupération des utilisateurs.");
-        }
-
-        const data = await response.json();
+        const data = await apiClient("/api/utilisateurs"); // Utilisation de apiClient
         setClients(data); // Charger les utilisateurs
       } catch (error) {
         console.error("Erreur lors de la récupération des utilisateurs :", error);
@@ -35,19 +19,6 @@ export default function GestionClients() {
 
     fetchUtilisateurs();
   }, []);
-
-  const fetchUtilisateurs = async () => {
-    try {
-      const response = await fetch("/api/utilisateurs");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des utilisateurs.");
-      }
-      const data = await response.json();
-      setClients(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const handleAdd = () => {
     router.push("/admin/AjoutUtilisateurs");
@@ -58,28 +29,15 @@ export default function GestionClients() {
   };
 
   const handleDelete = async (id: number) => {
-    const token = localStorage.getItem("jwtToken");
-
-    if (!token) {
-      console.error("Token JWT manquant.");
-      return;
-    }
-
     if (confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
       try {
-        const response = await fetch(`/api/utilisateurs/${id}`, {
+        await apiClient(`/api/utilisateurs/${id}`, {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`, // Ajouter le token JWT dans l'en-tête
-          },
         });
 
-        if (!response.ok) {
-          throw new Error("Erreur lors de la suppression de l'utilisateur.");
-        }
-
         alert("Utilisateur supprimé avec succès !");
-        fetchUtilisateurs(); // Recharger la liste des utilisateurs
+        const data = await apiClient("/api/utilisateurs"); // Rafraîchit la liste des utilisateurs
+        setClients(data);
       } catch (error) {
         console.error("Erreur lors de la suppression de l'utilisateur :", error);
         alert("Une erreur est survenue lors de la suppression de l'utilisateur.");
@@ -91,23 +49,14 @@ export default function GestionClients() {
     if (confirm("Êtes-vous sûr de vouloir réinitialiser le mot de passe de cet utilisateur ?")) {
       try {
         const newPassword = `BrasserieTS.${nom}.${prenom}`;
-        const response = await fetch(`/api/utilisateurs/${id}`, {
+        await apiClient(`/api/utilisateurs/${id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            mdp: newPassword 
-          }),
+          body: JSON.stringify({ mdp: newPassword }),
         });
-
-        if (!response.ok) {
-          throw new Error("Erreur lors de la réinitialisation du mot de passe.");
-        }
 
         alert("Mot de passe réinitialisé avec succès !");
       } catch (error) {
-        console.error(error);
+        console.error("Erreur lors de la réinitialisation du mot de passe :", error);
         alert("Une erreur est survenue lors de la réinitialisation du mot de passe.");
       }
     }
@@ -115,7 +64,10 @@ export default function GestionClients() {
 
   return (
     <div className="container">
-      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"></link>
+      <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        rel="stylesheet"
+      ></link>
       {/* Header */}
       <Header />
 
@@ -159,13 +111,13 @@ export default function GestionClients() {
                   >
                     <i className="fas fa-key"></i>
                   </button>
-                  <button 
+                  <button
                     className="btn btn-danger btn-sm me-2"
                     onClick={() => handleDelete(client.id)}
                     title="Supprimer l'utilisateur"
-                    >
+                  >
                     <i className="fas fa-trash"></i>
-                  </button> 
+                  </button>
                 </td>
               </tr>
             ))}

@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use OpenApi\Attributes as OA;
 
 final class ProduitController extends AbstractController
 {
@@ -21,6 +22,7 @@ final class ProduitController extends AbstractController
     /** 
      * Route pour récupérer tous les produits
     */
+    #[OA\Tag(name: 'Produits')]
     #[Route('/api/produits', name: 'getProduits', methods: ['GET'])]
     public function getAllProduits(ProduitRepository $produitRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -32,6 +34,7 @@ final class ProduitController extends AbstractController
     /**
      * Route pour récupérer un produit par son ID
      */
+    #[OA\Tag(name: 'Produits')]
     #[Route('/api/produits/{id}', name: 'getProduit', methods: ['GET'])]
     public function getDetailProduit(Produit $produit, SerializerInterface $serializer): JsonResponse
     {
@@ -43,6 +46,7 @@ final class ProduitController extends AbstractController
     /**
      *  Route pour supprimer un produit par son ID
      */
+    #[OA\Tag(name: 'Produits')]
     #[Route('/api/produits/{id}', name: 'deleteProduit', methods: ['DELETE'])]
     public function deleteProduit(Produit $produit, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -54,6 +58,7 @@ final class ProduitController extends AbstractController
     /**
      * Route pour créer un produit
      */
+    #[OA\Tag(name: 'Produits')]
     #[Route('/api/produits', name: 'createProduit', methods: ['POST'])]
     public function addProduit(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
@@ -77,6 +82,7 @@ final class ProduitController extends AbstractController
     /**
      * Route pour mettre à jour un produit par son ID
      */
+    #[OA\Tag(name: 'Produits')]
     #[Route('/api/produits/{id}', name: 'updateProduit', methods: ['PUT'])]
     public function updateProduit(
         Request $request, 
@@ -101,6 +107,7 @@ final class ProduitController extends AbstractController
     /**
      * Route pour supprimer un produit par son ID
      */
+    #[OA\Tag(name: 'Produits')]
     #[Route('/api/produits/{id}', name: 'delete_product', methods: ['DELETE'])]
     public function deleteProduct(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {

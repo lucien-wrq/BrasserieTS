@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Nelmio\ApiDocBundle\Attribute\Security;
+use OpenApi\Attributes as OA;
 
 final class DetailsReservationController extends AbstractController
 {
@@ -16,6 +18,8 @@ final class DetailsReservationController extends AbstractController
     /**
      * Route pour récupérer tous les détails de réservation
      */
+    #[OA\Tag(name: 'Détails de réservation')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/details-reservations', name: 'getDetailsReservations', methods: ['GET'])]
     public function getAllDetailsReservations(EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
     {
@@ -27,6 +31,8 @@ final class DetailsReservationController extends AbstractController
     /**
      * Route pour récupérer un détail de réservation par son ID
      */
+    #[OA\Tag(name: 'Détails de réservation')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/details-reservations/{id}', name: 'getDetailsReservation', methods: ['GET'])]
     public function getDetailDetailsReservation(DetailsReservation $detailsReservation, SerializerInterface $serializer): JsonResponse
     {
@@ -37,6 +43,8 @@ final class DetailsReservationController extends AbstractController
     /**
      * Route pour supprimer un détail de réservation par son ID
      */
+    #[OA\Tag(name: 'Détails de réservation')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/details-reservations/{id}', name: 'deleteDetailsReservation', methods: ['DELETE'])]
     public function deleteDetailsReservation(DetailsReservation $detailsReservation, EntityManagerInterface $entityManager): JsonResponse
     {

@@ -16,12 +16,16 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Repository\RoleRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Attribute\Security;
 
 final class UtilisateurController extends AbstractController
 {
     /**
      * Route pour récupérer tous les utilisateurs
      */
+    #[OA\Tag(name: 'Utilisateurs')]
+    #[Security(name: 'Bearer')]
     #[Route('api/utilisateurs', name: 'getAllUtilisateurs', methods: ['GET'])]
     public function getAllUtilisateurs(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -37,6 +41,8 @@ final class UtilisateurController extends AbstractController
     /**
      * Route pour récupérer un utilisateur par son ID
      */
+    #[OA\Tag(name: 'Utilisateurs')]
+    #[Security(name: 'Bearer')]
     #[Route('api/utilisateurs/{id}', name: 'getUtilisateur', methods: ['GET'])]
     public function getDetailUtilisateur(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer, int $id): JsonResponse
     {
@@ -51,6 +57,8 @@ final class UtilisateurController extends AbstractController
     /**
      * Route pour supprimer un utilisateur par son ID
      */
+    #[OA\Tag(name: 'Utilisateurs')]
+    #[Security(name: 'Bearer')]
     #[Route('api/utilisateurs/{id}', name: 'deleteUtilisateur', methods: ['DELETE'])]
     public function deleteUtilisateur(Utilisateur $utilisateur, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -63,6 +71,7 @@ final class UtilisateurController extends AbstractController
     /**
      * Route pour créer un nouvel utilisateur
      */ 
+    #[OA\Tag(name: 'Utilisateurs')]
     #[Route('/api/utilisateurs', name: 'createUtilisateur', methods: ['POST'])]
     public function addUtilisateur(
         Request $request,
@@ -74,8 +83,9 @@ final class UtilisateurController extends AbstractController
         $prenom = $content['prenom'] ?? null;
         $email = $content['email'] ?? null;
         $password = $content['password'] ?? null;
+        $role = $content['role'] ?? null;
 
-        if (empty($nom) || empty($prenom) || empty($email) || empty($password)) {
+        if (empty($nom) || empty($prenom) || empty($email) || empty($password) || empty($role)) {
             return new JsonResponse(['message' => 'Tous les champs sont requis.'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
@@ -90,7 +100,7 @@ final class UtilisateurController extends AbstractController
                     ->setPrenom($prenom)
                     ->setEmail($email)
                     ->setPassword($passwordHasher->hashPassword($utilisateur, $password))
-                    ->setRoles(['ROLE_USER']);
+                    ->setRoles([$role]);
 
         $entityManager->persist($utilisateur);
         $entityManager->flush();
@@ -101,6 +111,7 @@ final class UtilisateurController extends AbstractController
     /**
      * Route pour mettre à jour un utilisateur par son ID
      */
+    #[OA\Tag(name: 'Utilisateurs')]
     #[Route('/api/utilisateurs/{id}', name: 'updateUtilisateur', methods: ['PUT'])]
     public function updateUtilisateur(
         Request $request, 
@@ -122,7 +133,7 @@ final class UtilisateurController extends AbstractController
         // Vérification et hashage du mot de passe si modifié
         if (isset($content['mdp']) && !empty($content['mdp'])) {
             $hashedPassword = password_hash($content['mdp'], PASSWORD_BCRYPT);
-            $updatedUtilisateur->setMdp($hashedPassword);
+            $updatedUtilisateur->setPassword($hashedPassword);
         }
 
         $em->persist($updatedUtilisateur);

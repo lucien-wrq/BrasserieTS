@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import { useRouter } from "next/router";
+import { apiClient } from "../../utils/apiClient"; // Import de la fonction utilitaire
 
 export default function GestionProduits() {
   const [produits, setProduits] = useState([]);
@@ -30,14 +31,10 @@ export default function GestionProduits() {
   const fetchProduits = async () => {
     try {
       setIsLoading(true); // Début du chargement
-      const response = await fetch("/api/produits");
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des produits.");
-      }
-      const data = await response.json();
+      const data = await apiClient("/api/produits"); // Utilisation de apiClient
       setProduits(data);
     } catch (error) {
-      console.error(error);
+      console.error("Erreur lors de la récupération des produits :", error);
     } finally {
       setIsLoading(false); // Fin du chargement
     }
@@ -60,18 +57,20 @@ export default function GestionProduits() {
   const handleDelete = async (id: number) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
       try {
-        const response = await fetch(`/api/produits/${id}`, {
+        const response = await apiClient(`/api/produits/${id}`, {
           method: "DELETE",
         });
 
-        if (!response.ok) {
-          throw new Error("Erreur lors de la suppression du produit.");
+        if (response === null) {
+          console.log("Produit supprimé avec succès !");
+        } else {
+          console.warn("Réponse inattendue lors de la suppression :", response);
         }
 
         alert("Produit supprimé avec succès !");
         fetchProduits(); // Rafraîchit la liste des produits après suppression
       } catch (error) {
-        console.error(error);
+        console.error("Erreur lors de la suppression du produit :", error);
         alert("Une erreur est survenue lors de la suppression du produit.");
       }
     }
