@@ -4,6 +4,8 @@ import '../pages/cart_page.dart'; // Page Panier
 import '../pages/account_page.dart'; // Page Compte
 
 class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+
   @override
   _MainNavigationState createState() => _MainNavigationState();
 }
