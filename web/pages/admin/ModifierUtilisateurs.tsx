@@ -20,7 +20,7 @@ export default function ModifierUtilisateurs() {
     const fetchUtilisateur = async () => {
       if (!id) return;
       try {
-        const data = await apiClient(`/api/utilisateurs/${id}`); // Utilisation de apiClient
+        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs/${id}`); // Utilisation de apiClient
         setUtilisateur({
           nom: data.nom,
           prenom: data.prenom,
@@ -61,7 +61,7 @@ export default function ModifierUtilisateurs() {
     };
 
     try {
-      await apiClient(`/api/utilisateurs/${id}`, {
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs/${id}`, {
         method: "PUT", // Utilisation de la méthode PUT pour la modification
         body: JSON.stringify(payload),
       });

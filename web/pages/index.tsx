@@ -8,7 +8,7 @@ export default function Home() {
 
   useEffect(() => {
     // Récupérer les produits
-    fetch("/api/produits")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/produits`)
       .then((res) => res.json())
       .then((data) => setProduits(data));
   }, []);
@@ -65,7 +65,7 @@ export default function Home() {
             <div key={produit.id} className="col">
               <div className="card h-100 shadow-sm">
                 <img
-                  src={`/api/images/${produit.id}`}
+                  src={`${process.env.NEXT_PUBLIC_API_URL}/images/${produit.id}`}
                   alt={`Image de ${produit.nom}`}
                   className="card-img-top"
                   style={{ maxHeight: "400px", objectFit: "cover" }}

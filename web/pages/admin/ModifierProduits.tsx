@@ -18,7 +18,7 @@ export default function ModifierProduits() {
     const fetchProduit = async () => {
       if (!id) return;
       try {
-        const response = await fetch(`/api/produits/${id}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produits/${id}`);
         if (!response.ok) {
           throw new Error("Erreur lors de la récupération du produit.");
         }
@@ -56,7 +56,7 @@ export default function ModifierProduits() {
     }
 
     try {
-      const response = await fetch(`/api/produits/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produits/${id}`, {
         method: "PUT", // Utilisation de la méthode PUT pour la modification
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

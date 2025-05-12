@@ -58,14 +58,12 @@ export default function AjoutUtilisateurs() {
       nom: newClient.nom,
       prenom: newClient.prenom,
       email: newClient.email,
-      password: newClient.mdp, // Changez "mdp" en "password"
-      role: newClient.roles[0], // Envoyez uniquement le premier rôle (l'API attend un seul rôle)
+      password: newClient.mdp, 
+      role: newClient.roles[0], 
     };
 
-    console.log("Données envoyées :", payload); // Log des données envoyées
-
     try {
-      await apiClient("/api/utilisateurs", {
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs`, {
         method: "POST",
         body: JSON.stringify(payload),
       });
@@ -79,7 +77,7 @@ export default function AjoutUtilisateurs() {
   };
 
   const handleRetour = () => {
-    router.push("/admin/clients"); // Redirection vers la page clients
+    router.push("/admin/clients"); 
   };
 
   return (
@@ -92,7 +90,7 @@ export default function AjoutUtilisateurs() {
         <h1 className="text-center mb-4">Ajouter un utilisateur</h1>
 
         <div className="card p-4" style={{ transform: "none" }}>
-          {error && <p className="text-danger">{error}</p>} {/* Affiche les erreurs */}
+          {error && <p className="text-danger">{error}</p>} 
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label htmlFor="nom" className="form-label">

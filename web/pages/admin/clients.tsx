@@ -10,7 +10,7 @@ export default function GestionClients() {
   useEffect(() => {
     const fetchUtilisateurs = async () => {
       try {
-        const data = await apiClient("/api/utilisateurs"); // Utilisation de apiClient
+        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs`); 
         setClients(data); // Charger les utilisateurs
       } catch (error) {
         console.error("Erreur lors de la récupération des utilisateurs :", error);
@@ -31,12 +31,12 @@ export default function GestionClients() {
   const handleDelete = async (id: number) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
       try {
-        await apiClient(`/api/utilisateurs/${id}`, {
+        await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs/${id}`, {
           method: "DELETE",
         });
 
         alert("Utilisateur supprimé avec succès !");
-        const data = await apiClient("/api/utilisateurs"); // Rafraîchit la liste des utilisateurs
+        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs`); 
         setClients(data);
       } catch (error) {
         console.error("Erreur lors de la suppression de l'utilisateur :", error);
@@ -49,7 +49,7 @@ export default function GestionClients() {
     if (confirm("Êtes-vous sûr de vouloir réinitialiser le mot de passe de cet utilisateur ?")) {
       try {
         const newPassword = `BrasserieTS.${nom}.${prenom}`;
-        await apiClient(`/api/utilisateurs/${id}`, {
+        await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs/${id}`, {
           method: "PUT",
           body: JSON.stringify({ mdp: newPassword }),
         });

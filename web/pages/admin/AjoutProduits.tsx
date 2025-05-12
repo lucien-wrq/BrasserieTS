@@ -44,7 +44,7 @@ export default function AjoutProduits() {
 
     try {
       // Envoi des données du produit
-      const produitResponse = await fetch("/api/produits", {
+      const produitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produits`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,7 +66,7 @@ export default function AjoutProduits() {
       const formData = new FormData();
       formData.append("fichier", image);
 
-      const imageResponse = await fetch(`/api/produits/${produitData.id}/upload-image`, {
+      const imageResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produits/${produitData.id}/upload-image`, {
         method: "POST",
         body: formData,
       });
