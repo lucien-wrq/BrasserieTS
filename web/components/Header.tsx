@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function Header() {
   const [role, setRole] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function Header() {
   return (
     <header className="text-black py-3">
       <div className="container d-flex justify-content-between align-items-center">
+      <SpeedInsights />
         {/* Logo */}
         <div className="d-flex align-items-center">
           <img
