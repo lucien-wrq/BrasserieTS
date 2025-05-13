@@ -11,7 +11,7 @@ export default function ReservationsClient() {
   useEffect(() => {
     const fetchReservations = async () => {
       try {
-        const data = await apiClient("/api/reservations");
+        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations`);
         setReservations(data); // Charger les réservations
       } catch (error) {
         console.error("Erreur lors du chargement des réservations :", error);
@@ -24,7 +24,7 @@ export default function ReservationsClient() {
   useEffect(() => {
     const fetchDetailsReservations = async () => {
       try {
-        const data = await apiClient("/api/details-reservations");
+        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/details-reservations`);
         setDetailsReservations(data);
       } catch (error) {
         console.error("Erreur lors du chargement des détails des réservations :", error);
@@ -43,7 +43,7 @@ export default function ReservationsClient() {
 
       for (const produitId of uniqueProduitIds) {
         try {
-          const produit = await apiClient(`/api/produits/${produitId}`);
+          const produit = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/produits/${produitId}`);
           produitsMap[produitId] = produit;
         } catch (error) {
           console.error(`Erreur lors de la récupération du produit ${produitId} :`, error);
@@ -67,7 +67,7 @@ export default function ReservationsClient() {
 
       for (const utilisateurId of uniqueUtilisateurIds) {
         try {
-          const utilisateur = await apiClient(`/api/utilisateurs/${utilisateurId}`);
+          const utilisateur = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/utilisateurs/${utilisateurId}`);
           utilisateursMap[utilisateurId] = utilisateur;
         } catch (error) {
           console.error(`Erreur lors de la récupération de l'utilisateur ${utilisateurId} :`, error);
@@ -84,13 +84,13 @@ export default function ReservationsClient() {
 
   const handleMettreEnAttente = async (id: number) => {
     try {
-      await apiClient(`/api/reservations/${id}`, {
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations/${id}`, {
         method: "PUT",
         body: JSON.stringify({ etat: "En attente" }),
       });
 
       alert(`La réservation avec l'ID ${id} a été mise en attente avec succès.`);
-      const data = await apiClient("/api/reservations");
+      const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations`);
       setReservations(data);
     } catch (error) {
       console.error("Erreur lors de la mise en attente de la réservation :", error);
@@ -104,12 +104,12 @@ export default function ReservationsClient() {
     }
 
     try {
-      await apiClient(`/api/reservations/${id}`, {
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations/${id}`, {
         method: "DELETE",
       });
 
       alert(`La réservation avec l'ID ${id} a été supprimée avec succès.`);
-      const data = await apiClient("/api/reservations");
+      const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations`);
       setReservations(data);
     } catch (error) {
       console.error("Erreur lors de la suppression de la réservation :", error);
@@ -119,13 +119,13 @@ export default function ReservationsClient() {
 
   const handleConfirmer = async (id: number) => {
     try {
-      await apiClient(`/api/reservations/${id}`, {
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations/${id}`, {
         method: "PUT",
         body: JSON.stringify({ etat: "Confirmée" }),
       });
 
       alert(`La réservation avec l'ID ${id} a été Confirmée avec succès.`);
-      const data = await apiClient("/api/reservations");
+      const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations`);
       setReservations(data);
     } catch (error) {
       console.error("Erreur lors de la confirmation de la réservation :", error);
@@ -135,13 +135,13 @@ export default function ReservationsClient() {
 
   const handleAnnuler = async (id: number) => {
     try {
-      await apiClient(`/api/reservations/${id}`, {
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations/${id}`, {
         method: "PUT",
         body: JSON.stringify({ etat: "Annulée" }),
       });
 
       alert(`La réservation avec l'ID ${id} a été Annulée avec succès.`);
-      const data = await apiClient("/api/reservations");
+      const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/reservations`);
       setReservations(data);
     } catch (error) {
       console.error("Erreur lors de l'annulation de la réservation :", error);

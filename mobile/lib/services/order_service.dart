@@ -37,8 +37,12 @@ class OrderService {
   }
 
   // Créer une réservation
-  Future<void> createReservation(
-      List<Map<String, dynamic>> cart, int utilisateurId, int statusId) async {
+  Future<void> createReservation({
+    required List<Map<String, dynamic>> cart,
+    required int utilisateurId,
+    required int statusId,
+    required String date,
+  }) async {
     final token = await _getToken();
     final response = await http.post(
       Uri.parse('${Config.apiUrl}/reservations'),
@@ -47,9 +51,15 @@ class OrderService {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode({
+        'date': date,
         'utilisateur_id': utilisateurId,
         'status_id': statusId,
-        'details': cart,
+        'details': cart.map((item) {
+          return {
+            'produit_id': item['id'],
+            'quantite': item['quantite'],
+          };
+        }).toList(),
       }),
     );
 
@@ -66,5 +76,45 @@ class OrderService {
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('jwtToken');
+  }
+
+  // Décrémenter le stock d'un produit
+  Future<void> decrementStock(int productId, int quantity) async {
+    final token = await _getToken();
+
+    // Récupérer le stock actuel du produit
+    final getResponse = await http.get(
+      Uri.parse('${Config.apiUrl}/produits/$productId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (getResponse.statusCode != 200) {
+      throw Exception("Erreur lors de la récupération du stock pour le produit $productId.");
+    }
+
+    final productData = jsonDecode(getResponse.body);
+    final availableQuantity = productData['quantite'];
+
+    // Calculer le nouveau stock
+    final newQuantity = availableQuantity - quantity;
+    if (newQuantity < 0) {
+      throw Exception("Stock insuffisant pour le produit $productId.");
+    }
+
+    // Mettre à jour le stock
+    final putResponse = await http.put(
+      Uri.parse('${Config.apiUrl}/produits/$productId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'quantite': newQuantity}),
+    );
+
+    if (putResponse.statusCode != 200) {
+      throw Exception("Erreur lors de la mise à jour du stock pour le produit $productId.");
+    }
   }
 }

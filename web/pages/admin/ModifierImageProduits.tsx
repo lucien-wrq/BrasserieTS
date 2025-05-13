@@ -17,7 +17,7 @@ export default function ModifierImageProduits() {
 
   const fetchProduit = async () => {
     try {
-      const response = await fetch(`/api/produits/${id}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produits/${id}`);
       if (!response.ok) {
         throw new Error("Erreur lors de la récupération du produit.");
       }
@@ -50,7 +50,7 @@ export default function ModifierImageProduits() {
       const formData = new FormData();
       formData.append("fichier", image);
 
-      const response = await fetch(`/api/produits/${id}/upload-image`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/produits/${id}/upload-image`, {
         method: "POST",
         body: formData,
       });
@@ -91,7 +91,7 @@ export default function ModifierImageProduits() {
                 </label>
                 <div>
                   <img
-                    src={`/api/images/${produit.id}`}
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/images/${produit.id}`}
                     alt={produit.nom}
                     width={150}
                     height={150}

@@ -4,6 +4,8 @@ import '../services/order_service.dart';
 import '../services/user_service.dart'; // Import du service utilisateur
 
 class CartPage extends StatefulWidget {
+  const CartPage({super.key});
+
   @override
   _CartPageState createState() => _CartPageState();
 }
@@ -69,11 +71,24 @@ class _CartPageState extends State<CartPage> {
       }
 
       // Créer la réservation
+      final currentDate = DateTime.now().toIso8601String();
       await _orderService.createReservation(
-        _cart,
-        userId, // Utiliser l'ID du client récupéré
-        1, // Remplacez par l'ID du statut approprié
+        cart: _cart,
+        utilisateurId: userId,
+        statusId: 1,
+        date: currentDate,
       );
+
+      // Décrémenter le stock des produits
+      for (var product in _cart) {
+        final productId = product['id'];
+        final quantity = product['quantite'];
+        try {
+          await _orderService.decrementStock(productId, quantity);
+        } catch (e) {
+          print("Erreur lors de la mise à jour du stock pour le produit $productId : $e");
+        }
+      }
 
       // Vider le panier après validation
       await _cartService.clearCart();
@@ -89,8 +104,10 @@ class _CartPageState extends State<CartPage> {
       setState(() {
         _isLoading = false;
       });
+      // Afficher l'erreur exacte dans le log et le SnackBar
+      print("Erreur lors de la validation de la réservation : $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur lors de la validation de la réservation.")),
+        SnackBar(content: Text("Erreur lors de la validation de la réservation : $e")),
       );
     }
   }
@@ -116,6 +133,9 @@ class _CartPageState extends State<CartPage> {
                         itemCount: _cart.length,
                         itemBuilder: (context, index) {
                           final product = _cart[index];
+                          final productId = product['id'];
+                          final quantity = product['quantite'];
+
                           return Card(
                             elevation: 4,
                             margin: const EdgeInsets.only(bottom: 10),
@@ -142,9 +162,70 @@ class _CartPageState extends State<CartPage> {
                                     style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                                   ),
                                   SizedBox(height: 5),
-                                  Text(
-                                    "Quantité : ${product['quantite'] ?? 1}",
-                                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Contrôles pour modifier la quantité
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.remove),
+                                            onPressed: quantity > 1
+                                                ? () async {
+                                                    final newQuantity = quantity - 1;
+                                                    await _cartService.updateProductQuantity(productId, newQuantity);
+                                                    setState(() {
+                                                      product['quantite'] = newQuantity;
+                                                    });
+                                                  }
+                                                : null,
+                                          ),
+                                          SizedBox(
+                                            width: 50,
+                                            child: TextField(
+                                              textAlign: TextAlign.center,
+                                              keyboardType: TextInputType.number,
+                                              controller: TextEditingController(
+                                                text: quantity.toString(),
+                                              ),
+                                              onSubmitted: (value) async {
+                                                final newQuantity = int.tryParse(value);
+                                                if (newQuantity != null && newQuantity > 0) {
+                                                  await _cartService.updateProductQuantity(productId, newQuantity);
+                                                  setState(() {
+                                                    product['quantite'] = newQuantity;
+                                                  });
+                                                } else {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(content: Text("Veuillez entrer une quantité valide.")),
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.add),
+                                            onPressed: () async {
+                                              final newQuantity = quantity + 1;
+                                              await _cartService.updateProductQuantity(productId, newQuantity);
+                                              setState(() {
+                                                product['quantite'] = newQuantity;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      // Bouton pour supprimer le produit
+                                      IconButton(
+                                        icon: Icon(Icons.delete, color: Colors.red),
+                                        onPressed: () async {
+                                          await _cartService.removeProductFromCart(productId);
+                                          setState(() {
+                                            _cart.removeAt(index);
+                                          });
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -157,11 +238,11 @@ class _CartPageState extends State<CartPage> {
                       padding: const EdgeInsets.all(10.0),
                       child: ElevatedButton(
                         onPressed: _cart.isNotEmpty ? _validateReservation : null,
-                        child: Text("Valider la réservation"),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
                           textStyle: TextStyle(fontSize: 16),
                         ),
+                        child: Text("Valider la réservation"),
                       ),
                     ),
                   ],

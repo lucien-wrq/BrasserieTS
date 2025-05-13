@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/config.dart'; // Import de la configuration
+import '../config/config.dart';
 
 class AuthService {
   Future<bool> login(String email, String password) async {
@@ -14,11 +14,9 @@ class AuthService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
-      // Stocker le token JWT
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('jwtToken', data['token']);
 
-      // Récupérer l'ID de l'utilisateur et le stocker en tant que String
       final userId = data['utilisateur']['id'].toString();
       await prefs.setString('userId', userId);
 
@@ -30,7 +28,7 @@ class AuthService {
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Supprimer toutes les données utilisateur
+    await prefs.clear(); 
   }
 
   Future<String?> getToken() async {

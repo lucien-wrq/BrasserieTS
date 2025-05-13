@@ -3,6 +3,8 @@ import '../services/product_service.dart';
 import '../services/cart_service.dart'; // Import du service panier
 
 class ProductPage extends StatefulWidget {
+  const ProductPage({super.key});
+
   @override
   _ProductPageState createState() => _ProductPageState();
 }
@@ -14,7 +16,7 @@ class _ProductPageState extends State<ProductPage> {
   bool _isLoading = true;
 
   // Map pour stocker les quantités sélectionnées pour chaque produit
-  Map<int, int> _selectedQuantities = {};
+  final Map<int, int> _selectedQuantities = {};
 
   @override
   void initState() {
@@ -25,6 +27,7 @@ class _ProductPageState extends State<ProductPage> {
   void _loadProducts() async {
     try {
       final products = await _productService.fetchProducts();
+      if (!mounted) return; // Vérifier si le widget est toujours monté
       setState(() {
         _products = products;
         _isLoading = false;
@@ -35,6 +38,7 @@ class _ProductPageState extends State<ProductPage> {
         }
       });
     } catch (e) {
+      if (!mounted) return; // Vérifier si le widget est toujours monté
       setState(() {
         _isLoading = false;
       });
@@ -45,14 +49,22 @@ class _ProductPageState extends State<ProductPage> {
   void _addToCart(Map<String, dynamic> product, int quantity) async {
     try {
       await _cartService.addToCart(product, quantity); // Ajouter le produit au panier
+      if (!mounted) return; // Vérifier si le widget est toujours monté
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("$quantity x ${product['nom']} ajouté(s) au panier !")),
       );
     } catch (e) {
+      if (!mounted) return; // Vérifier si le widget est toujours monté
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur lors de l'ajout au panier.")),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    // Nettoyer les ressources si nécessaire
+    super.dispose();
   }
 
   @override
@@ -70,60 +82,98 @@ class _ProductPageState extends State<ProductPage> {
                 final selectedQuantity = _selectedQuantities[productId] ?? 1;
 
                 return Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.only(bottom: 10),
+                  elevation: 6, // Augmente l'ombre pour un effet de profondeur
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(15), // Bordures arrondies
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Image du produit
                       ClipRRect(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                         child: Image.network(
                           _productService.getProductImageUrl(productId),
                           height: 400,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.cover, // Ajuste l'image pour remplir l'espace
                           errorBuilder: (context, error, stackTrace) =>
                               Icon(Icons.broken_image, size: 50),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(12.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    product['nom'],
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
+                            // Nom du produit
+                            Text(
+                              product['nom'],
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueGrey[700],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: 5),
+                            // Prix du produit
                             Text(
                               "Prix : ${product['prix']} €",
-                              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             SizedBox(height: 5),
+                            // Stock disponible
                             Text(
                               "Stock disponible : ${product['quantite'].toInt()}",
-                              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                              ),
                             ),
                             SizedBox(height: 10),
+                            // Bouton pour afficher la description complète
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(
+                                        product['nom'],
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      content: Text(
+                                        product['description'] ?? "Aucune description disponible.",
+                                        style: TextStyle(fontSize: 14, color: Colors.grey[800]),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          child: Text("Fermer"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                icon: Icon(Icons.info_outline, color: Colors.blue),
+                                label: Text(
+                                  "Voir la description",
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            // Contrôles pour la quantité et bouton d'ajout au panier
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // Stepper pour choisir la quantité avec un TextField
+                                // Contrôles pour la quantité
                                 Row(
                                   children: [
                                     IconButton(
@@ -137,7 +187,7 @@ class _ProductPageState extends State<ProductPage> {
                                             }
                                           : null,
                                     ),
-                                    Container(
+                                    SizedBox(
                                       width: 50,
                                       child: TextField(
                                         textAlign: TextAlign.center,
@@ -178,10 +228,22 @@ class _ProductPageState extends State<ProductPage> {
                                     ),
                                   ],
                                 ),
-                                IconButton(
-                                  icon: Icon(Icons.add_shopping_cart),
-                                  color: Colors.teal,
+                                // Bouton d'ajout au panier
+                                ElevatedButton.icon(
                                   onPressed: () => _addToCart(product, selectedQuantity),
+                                  icon: Icon(Icons.add_shopping_cart),
+                                  label: Text("Ajouter"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.teal,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                      horizontal: 15,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),

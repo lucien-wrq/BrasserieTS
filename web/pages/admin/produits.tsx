@@ -31,7 +31,7 @@ export default function GestionProduits() {
   const fetchProduits = async () => {
     try {
       setIsLoading(true); // Début du chargement
-      const data = await apiClient("/api/produits"); // Utilisation de apiClient
+      const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/produits`); 
       setProduits(data);
     } catch (error) {
       console.error("Erreur lors de la récupération des produits :", error);
@@ -57,7 +57,7 @@ export default function GestionProduits() {
   const handleDelete = async (id: number) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
       try {
-        const response = await apiClient(`/api/produits/${id}`, {
+        const response = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/produits/${id}`, {
           method: "DELETE",
         });
 
@@ -124,7 +124,7 @@ export default function GestionProduits() {
                       }}
                     >
                       <img
-                        src={`/api/images/${produit.id}?t=${imageTimestamp}`} // Ajout du timestamp pour contourner le cache
+                        src={`${process.env.NEXT_PUBLIC_API_URL}/images/${produit.id}?t=${imageTimestamp}`} // Ajout du timestamp pour contourner le cache
                         alt={produit.nom}
                         width={100}
                         height={100}
